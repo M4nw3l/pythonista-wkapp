@@ -18,6 +18,7 @@ requires = [
     "Mako"
 ]
 author = "M4nw3l"
+author-email = "63550247+M4nw3l@users.noreply.github.com"
 home-page = "https://github.com/m4nw3l/pythonista-wkapp"
 dist-name = "pythonista-wkapp"
 description-file = "README.md"

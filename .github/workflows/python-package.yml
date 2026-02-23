@@ -49,7 +49,7 @@ jobs:
         path: dist
   test-pypi-publish:
     needs: build
-    name: Publish to PyPI
+    name: Publish to TestPyPI
     runs-on: ubuntu-latest
     environment: testpypi
     permissions:
