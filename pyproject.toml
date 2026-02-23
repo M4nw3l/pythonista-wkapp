@@ -1,27 +1,14 @@
 [project]
 name = "pythonista-wkapp"
-version = "0.0.1"
 requires-python = ">= 3.10"
 dependencies = [
   "bottle",
   "Mako"
 ]
-
-[build-system]
-requires = ["flit_core >=2,<3"]
-build-backend = "flit_core.buildapi"
-
-[tool.flit.metadata]
-module = "wkapp"
-requires = [
-    "bottle",
-    "Mako"
+authors = [
+    {name = "M4nw3l", email = "63550247+M4nw3l@users.noreply.github.com"},
 ]
-author = "M4nw3l"
-author-email = "63550247+M4nw3l@users.noreply.github.com"
-home-page = "https://github.com/m4nw3l/pythonista-wkapp"
-dist-name = "pythonista_wkapp"
-description-file = "README.md"
+readme = "README.md"
 license = "MIT"
 classifiers = [
 		"Development Status :: 3 - Alpha",
@@ -32,3 +19,40 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Application Frameworks",
     "Topic :: Software Development :: User Interfaces"
 ]
+dynamic = ["version", "description"]
+
+[project.urls]
+Homepage = "https://github.com/m4nw3l/pythonista-wkapp"
+
+[tool.flit.module]
+name = "wkapp"
+
+[build-system]
+requires = ["flit_core >=3.11,<4"]
+build-backend = "flit_core.buildapi"
+
+#[build-system]
+#requires = ["flit_core >=2,<3"]
+#build-backend = "flit_core.buildapi"
+
+#[tool.flit.metadata]
+#module = "wkapp"
+#requires = [
+#    "bottle",
+#    "Mako"
+#]
+#author = "M4nw3l"
+#author-email = "63550247+M4nw3l@users.noreply.github.com"
+#home-page = "https://github.com/m4nw3l/pythonista-wkapp"
+#dist-name = "pythonista_wkapp"
+#description-file = "README.md"
+#license = "MIT"
+#classifiers = [
+#		"Development Status :: 3 - Alpha",
+#    "License :: OSI Approved :: MIT License",
+#    "Intended Audience :: Developers",
+#    "Operating System :: iOS",
+#    "Programming Language :: Python :: 3",
+#    "Topic :: Software Development :: Libraries :: Application Frameworks",
+#    "Topic :: Software Development :: User Interfaces"
+#]
