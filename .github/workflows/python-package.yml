@@ -57,7 +57,8 @@ jobs:
         cp wkapp/README.md README.md
         cp wkapp/LICENSE LICENSE
         python -m pip install --upgrade build
-        python -m pip install --upgrade flit         
+        python -m pip install --upgrade flit
+        python -m pip install --upgrade pythonista-stubs
         python -m build
     - name: Store package artifacts
       uses: actions/upload-artifact@v4
