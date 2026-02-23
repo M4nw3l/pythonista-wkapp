@@ -22,8 +22,7 @@ try:
     from objc_util import *
     import ui, console, webbrowser
 except:
-    pass    
-		#raise Exception("Pythonista 3 is required.")
+		raise Exception("Pythonista 3 is required.")
 
 import queue, weakref, ctypes, functools, time, os, json, re, sys
 from types import SimpleNamespace
