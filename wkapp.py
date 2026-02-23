@@ -9,7 +9,8 @@ try:
     #pythonista specific libraries
     import ui
 except:
-    raise Exception("Pythonista 3 is required.")
+	  pass
+    #raise Exception("Pythonista 3 is required.")
 
 import inspect
 import os
