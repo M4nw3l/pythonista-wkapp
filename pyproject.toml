@@ -27,7 +27,7 @@ Homepage = "https://github.com/m4nw3l/pythonista-wkapp"
 [tool.flit.module]
 name = "wkapp"
 [tool.flit.sdist]
-exclude = [".git/",".github/"]
+exclude = ["**/.*/",".github/"]
 
 [build-system]
 requires = ["flit_core >=3.11,<4"]
