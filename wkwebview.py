@@ -1,19 +1,19 @@
 #coding: utf-8
 '''
 WKWebView - modern webview for Pythonista
-1.0 -	https://github.com/mikaelho/pythonista-webview
+1.0 - https://github.com/mikaelho/pythonista-webview
 1.1 - https://gist.github.com/sbbosco/1290f59d79c6963e62bb678f0f05b035
 1.2 - Fixes and improvements by M4nw3l
-		 - Improved delegate object support 
-		 - Fixed content injection methods misrendering some js
-		 - Extended content injection methods to support reading from files
-		 - Extended javascript argument passing to python and vice versa with full json args serialisation
-		 - Added dispatcher queue thread to avoid deadlocks in callbacks / script message callbacks
-		   e.g eval_js can now be called from on_[script_message_name] handlers, webview_did_finish_load, 
-		   webview_did_start_load (if targets loaded)
-		 - Added custom schemes (WkURLSchemeHandler) support by adding a scheme_[schemeName](task) handler to a subclass.
-		 - Added some better handling for being notified when closing
-		 - Added some automatic cleanup on close e.g stopping the dispatcher thread
+    - Improved delegate object support 
+    - Fixed content injection methods misrendering some js
+    - Extended content injection methods to support reading from files
+    - Extended javascript argument passing to python and vice versa with full json args serialisation
+    - Added dispatcher queue thread to avoid deadlocks in callbacks / script message callbacks
+       e.g eval_js can now be called from on_[script_message_name] handlers, webview_did_finish_load, 
+       webview_did_start_load (if targets loaded)
+    - Added custom schemes (WkURLSchemeHandler) support by adding a scheme_[schemeName](task) handler to a subclass.
+    - Added some better handling for being notified when closing
+    - Added some automatic cleanup on close e.g stopping the dispatcher thread
 '''
 
 __version__ = '1.2'
@@ -1194,7 +1194,7 @@ if __name__ == '__main__':
     <title>WKWebView tests</title>
     <script type="text/javascript">
       function initialize() {
-      	//alert('init');
+        //alert('init');
         //result = prompt('Initialized', 'Yes, indeed');
         //if (result) {
           //window.webkit.messageHandlers.greeting.postMessage(
@@ -1225,21 +1225,21 @@ if __name__ == '__main__':
     custom_scheme = {
         'hello-page':
         '''
-  	<html>
-  	<head>
+    <html>
+    <head>
     <title>WKWebView Custom scheme tests</title>
     <script type="text/javascript">
       async function initialize() {
-      	try
-      	{
-        	let imported_module = await import("wkwebview://module-script");
-        	if(imported_module){
-          	imported_module.module_function()
-        	}
+        try
+        {
+          let imported_module = await import("wkwebview://module-script");
+          if(imported_module){
+            imported_module.module_function()
+          }
         }
         catch(e)
         {
-        	alert(`Error importing/running module: ${e}`);
+          alert(`Error importing/running module: ${e}`);
         }
       }
     </script>
