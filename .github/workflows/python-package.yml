@@ -22,10 +22,10 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: "Set version ${{ env.version }}"
-		  run: |
+      run: |
         VERSION='${{ env.version }}'
         VERSION="${VERSION/v/}"
-				sed -ie "s/__version__.*'/__version__ = '${VERSION}'" __init__.py
+        sed -ie "s/__version__.*'/__version__ = '${VERSION}'" __init__.py
         cat __init__.py
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3
