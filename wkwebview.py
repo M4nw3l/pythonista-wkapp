@@ -17,9 +17,13 @@ WKWebView - modern webview for Pythonista
 '''
 
 __version__ = '1.2'
+try:
+    #pythonista specific libraries
+    from objc_util import *
+    import ui, console, webbrowser
+except:
+    raise Exception("Pythonista 3 is required.")
 
-from objc_util import *
-import ui, console, webbrowser
 import queue, weakref, ctypes, functools, time, os, json, re, sys
 from types import SimpleNamespace
 import threading
