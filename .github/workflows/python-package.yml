@@ -47,7 +47,25 @@ jobs:
       with:
         name: packages
         path: dist
-  
+  test-pypi-publish:
+    needs: build
+    name: Publish to PyPI
+    runs-on: ubuntu-latest
+    environment: testpypi
+    permissions:
+      id-token: write
+    steps:
+      - name: Retrieve package artifacts
+        uses: actions/download-artifact@v5
+        with:
+          name: packages
+          path: dist
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          verbose: true
+          skip-existing: true
   pypi-publish:
     needs: build
     if: ${{ github.event_name == 'push' && github.ref_type == 'tag' && startsWith(github.ref_name,'v') }}
@@ -65,5 +83,4 @@ jobs:
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          repository-url: https://test.pypi.org/legacy/
           verbose: true
