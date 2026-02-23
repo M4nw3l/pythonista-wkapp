@@ -605,7 +605,7 @@ class WKApp:
 			self.server = None
 
 	def present(self, mode='fullscreen', no_cache = True, clear_cache = False, **kwargs):
-		self._app_view = ui.load_view(os.path.join(self.module_path, 'WKApp.pyui'))
+		self._app_view = ui.load_view(os.path.join(self.module_path, 'wkapp.pyui'))
 		self.no_cache = no_cache
 		self.clear_cache = clear_cache
 		self.app_view.load(self)
