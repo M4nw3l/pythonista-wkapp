@@ -50,6 +50,7 @@ jobs:
   
   pypi-publish:
     needs: build
+    if: ${{ github.event_name == 'push' && github.ref_type == 'tag' && startsWith(github.ref_name,'v') }}
     name: Publish to PyPI
     runs-on: ubuntu-latest
     environment: pypi
