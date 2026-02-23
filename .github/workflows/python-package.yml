@@ -8,7 +8,11 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-
+env:
+  version: ${{case(github.event_name == 'push' && 
+									 github.ref_type == 'tag' && 
+									 startsWith(github.ref_name,'v'),
+									 github.ref_name, format('v{0}.{1}.{2}',0,0,github.run_attempt)) }}
 jobs:
   build:
     name: Build packages
@@ -19,6 +23,12 @@ jobs:
         python-version: ["3.10"] #, "3.11"]
     steps:
     - uses: actions/checkout@v4
+    - name: Set version ${{ env.version }}
+		  run: |
+        VERSION='${{ env.version }}'
+        VERSION="${VERSION/v/}"
+				sed -ie "s/__version__.*'/__version__ = '${VERSION}'" __init__.py
+        cat __init__.py
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3
       with:
