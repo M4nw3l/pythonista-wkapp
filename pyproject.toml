@@ -12,7 +12,6 @@ readme = "README.md"
 license = "MIT"
 classifiers = [
 		"Development Status :: 3 - Alpha",
-    "License :: OSI Approved :: MIT License",
     "Intended Audience :: Developers",
     "Operating System :: iOS",
     "Programming Language :: Python :: 3",
