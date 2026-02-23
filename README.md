@@ -12,7 +12,7 @@ Pip is the recommended installation method for WKApp.
 Install [StaSh](https://github.com/ywangd/stash) for Pythonista 3 using the installation instructions from its README first.
 Then install the `pythonista-wkapp` module with pip.
 ```
-pip install pythonista-wkapp # DRAFT package is not published yet!
+pip install pythonista-wkapp
 ```
 Alternatively you can also clone or download a zip of this repository and copy/extract the project files into `site-packages/wkapp`.
 
