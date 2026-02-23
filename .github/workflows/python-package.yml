@@ -21,7 +21,7 @@ jobs:
         python-version: ["3.10"] #, "3.11"]
     steps:
     - uses: actions/checkout@v4
-    - name: Set version ${{ env.version }}
+    - name: "Set version ${{ env.version }}"
 		  run: |
         VERSION='${{ env.version }}'
         VERSION="${VERSION/v/}"
