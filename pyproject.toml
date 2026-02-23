@@ -2,8 +2,9 @@
 name = "pythonista-wkapp"
 requires-python = ">= 3.10"
 dependencies = [
-  "bottle",
-  "Mako"
+  "bottle >= 0.13.4",
+  "Mako",
+  "requests"
 ]
 authors = [
     {name = "M4nw3l", email = "63550247+M4nw3l@users.noreply.github.com"},
