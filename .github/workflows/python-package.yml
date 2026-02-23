@@ -54,6 +54,8 @@ jobs:
     - name: Build
       run: |
         cp wkapp/pyproject.toml pyproject.toml
+        cp wkapp/README.md README.md
+        cp wkapp/LICENSE LICENSE
         python -m pip install --upgrade build
         python -m pip install --upgrade flit         
         python -m build
