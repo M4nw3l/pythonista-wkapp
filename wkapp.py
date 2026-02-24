@@ -39,9 +39,9 @@ import logging
 log = logging.getLogger(__name__)
 
 try:
-    from .WKWebView import *
+    from .wkwebview import *
 except:
-    from WKWebView import *
+    from wkwebview import *
 
 
 class WKAppWebView(WKWebView):

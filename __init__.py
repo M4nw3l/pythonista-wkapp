@@ -9,7 +9,9 @@ try:
     from .wkwebview import *
     from .wkapp import *
 except:
-    pass
+    from wkwebview import *
+    from wkapp import *
+    
   
 # mostly convenience includes for bottle
 # besides its implementation specific includes for the mako templating integration
