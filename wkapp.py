@@ -5,11 +5,7 @@ https://github.com/M4nw3l/pythonista-wkapp
 '''
 __version__ = '0.0.1'
 
-try:
-    #pythonista specific libraries
-    import ui
-except:
-    raise Exception("Pythonista 3 is required.")
+import ui
 
 import inspect
 import os

@@ -15,14 +15,11 @@ WKWebView - modern webview for Pythonista
     - Added some better handling for being notified when closing
     - Added some automatic cleanup on close e.g stopping the dispatcher thread
 '''
+
 __version__ = '1.2'
 
-try:
-    #pythonista specific libraries
-    from objc_util import *
-    import ui, console, webbrowser
-except:
-		raise Exception("Pythonista 3 is required.")
+from objc_util import *
+import ui, console, webbrowser
 
 import queue, weakref, ctypes, functools, time, os, json, re, sys
 from types import SimpleNamespace
