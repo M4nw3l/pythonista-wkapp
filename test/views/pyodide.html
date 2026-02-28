@@ -1,0 +1,169 @@
+<%!
+
+class PyodideView:
+	def on_init(self):
+		pass
+
+view_class = PyodideView
+
+%>
+
+<%inherit file="view.html"/>
+
+<div class="p-1">
+<a href="/">Back to index.html</a>
+<p>
+<label>window.isSecureContext</label><br />
+<input id="window_secure_context" type="text" value="" />
+<br />
+<label>window.crossOriginIsolated</label><br />
+<input id="window_cross_origin_isolated" type="text" value="" />
+<br />
+
+<style type="text/css">
+textarea#stdout {
+  width : 95%; 
+  height : 80vh; 
+  overflow : auto;
+  font-style : monospace;
+  font-size : 10pt;
+  font-color : #808080;
+}
+</style>
+<textarea id="stdout" readonly>
+</textarea>
+
+
+</p>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "pyodide":"https://cdn.jsdelivr.net/pyodide/v0.29.3/full/pyodide.mjs"
+  }
+}
+</script>
+<script defer type="module">
+    import { loadPyodide } from "pyodide";
+
+    async function pyodideWebWorker (){
+      const { loadPyodide } = await import("https://cdn.jsdelivr.net/pyodide/v0.29.3/full/pyodide.mjs")
+      let pyodideReadyPromise = loadPyodide({
+      });
+      self.onmessage = async (event) => {
+        // make sure loading is done
+        const pyodide = await pyodideReadyPromise;
+        const { id, python, context } = event.data;
+        // Now load any packages we need, run the code, and send the result back.
+        await pyodide.loadPackagesFromImports(python);
+        // make a Python dictionary with the data from `context`
+        const dict = pyodide.globals.get("dict");
+        const globals = dict(Object.entries(context));
+        try {
+          // Execute the python code in this context
+          pyodide.setStdout({ batched: (msg) => self.postMessage({ stdout: msg, id })});
+          pyodide.setStderr({ batched: (msg) => self.postMessage({ stderr: msg, id })});
+          const result = await pyodide.runPythonAsync(python, { globals });
+          self.postMessage({ result, id });
+        } catch (error) {
+          self.postMessage({ error: error.message, id });
+        }
+      };
+    }
+
+    function writeln(text) {
+        let elem = $("#stdout")
+        text = elem.text() + '\n' + text;
+        elem.text(text);
+        elem.scrollTop(elem[0].scrollHeight);
+    }
+
+    function fn2workerURL(fn) {
+      const blob = new Blob([`($${fn.toString()})()`], { type: "text/javascript" });
+      return URL.createObjectURL(blob);
+    }
+    
+    function getPromiseAndResolve() {
+      let resolve;
+      let promise = new Promise((res) => {
+        resolve = res;
+      });
+      return { promise, resolve };
+    }
+
+    function getId() {
+       return crypto.randomUUID()
+    }
+
+    // Add an id to msg, send it to worker, then wait for a response with the same id.
+    // When we get such a response, use it to resolve the promise.
+    function requestResponse(worker, msg) {
+      const { promise, resolve } = getPromiseAndResolve();
+      const idWorker = getId();
+      worker.addEventListener("message", function listener(event) {
+        if (event.data?.id !== idWorker) {
+          return;
+        }
+        if(event.data.stdout || event.data.stderr) {
+          writeln(event.data.stdout ?? event.data.stderr);
+          return;
+        }
+
+        // This listener is done so remove it.
+        worker.removeEventListener("message", listener);
+        // Filter the id out of the result
+        const { id, ...rest } = event.data;
+        resolve(rest);
+      });
+      worker.postMessage({ id: idWorker, ...msg });
+      return promise;
+    }
+
+    const pyodideWorker = new Worker(fn2workerURL(pyodideWebWorker), { type: "module" });
+
+    function pyodideAsyncRun(script, context) {
+      return requestResponse(pyodideWorker, {
+        context,
+        python: script,
+      });
+    }
+
+    async function runPyodide(){
+      try
+      {
+        writeln("Pyodide: run worker");
+        const { result, error } = await pyodideAsyncRun(`
+        
+        def main():
+          print("stdout")
+          return "hello from" + " pyodide worker"
+
+        main()
+        `,{});
+        if (result) {
+          writeln(`Pyodide: $${result}`);
+        } else if (error) {
+          writeln(`Pyodide error: $${error}`);
+        }
+
+       }
+       catch(e)
+       {
+          writeln(`Error: $${e}`);
+       }
+    }
+
+    $(async function () {
+    	writeln("Document: ready");
+    	$("#window_secure_context").val(window.isSecureContext ? 'true' : 'false');
+    	$("#window_cross_origin_isolated").val(window.crossOriginIsolated ? 'true': 'false');
+    	
+    	writeln("Pyodide: init");
+      await loadPyodide({});
+      
+    	await runPyodide();
+    });
+</script>
+
+
