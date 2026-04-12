@@ -86,6 +86,8 @@ view_class = ViewClass
 Note: Code above is one file, it is just shown in two parts here for code highlighting purposes.
 
 [DeepWiki Documentation](https://deepwiki.com/M4nw3l/pythonista-wkapp/)
+Disclaimer: DeepWiki documentation is AI generated, some inaccuracies or incorrect details are present and should be expected, if in doubt always reference the code. 
+Further content with more agent guidance and wrangling to attempt to improve this documentations accuracy will be added on-going.  
 
 ### Dependencies
 WKApp requires the Pythonista 3 app on iOS to run but otherwise uses a minimal set of dependencies:
