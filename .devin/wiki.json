@@ -1,7 +1,7 @@
 {
   "repo_notes": [
     {
-      "content": "WKApp - A modern HTML5 UI framework for building iOS apps with Pythonista 3 and WebKit"
+      "content": ""
     }
   ],
   "pages": [
@@ -194,6 +194,15 @@
       "title": "WebAssembly and Pyodide Integration Tests",
       "purpose": "Covers the experimental WASM views: web_asm.html (Pyodide + Wasmer SDK), pyodide.html (Pyodide Web Worker pattern), and preact.html. Explains Cross-Origin Isolation requirements and the coi-serviceworker.js workaround.",
       "parent": "Test Views and Examples",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "API Reference",
+      "purpose": "Comprehensive and exhaustive listings and descriptions of public interface, including all classss, members/methods, arguments/parameters, static functions, constants, structures, mappings of Objective-C and C interop of the entire Application Programming Interface refernced directly with the Python source code.",
       "page_notes": [
         {
           "content": ""
