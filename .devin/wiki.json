@@ -1,0 +1,213 @@
+{
+  "repo_notes": [
+    {
+      "content": "WKApp - A modern HTML5 UI framework for building iOS apps with Pythonista 3 and WebKit"
+    }
+  ],
+  "pages": [
+    {
+      "title": "Overview",
+      "purpose": "High-level introduction to pythonista-wkapp: what it is, why it exists, key concepts, and how the major components fit together. Links to child pages for details.",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Getting Started",
+      "purpose": "Step-by-step guide for installing and running a minimal WKApp application in Pythonista 3. Covers StaSh/pip installation, the three-line bootstrap, directory structure requirements, and first run.",
+      "parent": "Overview",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Architecture Overview",
+      "purpose": "Explains the hybrid Python/WebKit architecture: how the Bottle.py WSGI server, Mako templating, WKWebView, and the Python–JavaScript bridge all interact at a high level. Introduces the main classes and their roles.",
+      "parent": "Overview",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Core Framework (wkapp module)",
+      "purpose": "Overview of the wkapp Python package — its public API, package structure, and how its sub-components collaborate. Links to child pages for each major sub-system.",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "WKApp Application Class",
+      "purpose": "Deep dive into the WKApp class: initialization, run(), exit(), server route setup, the webview delegate callbacks, and the wkapp:// custom URL scheme handler.",
+      "parent": "Core Framework (wkapp module)",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "WKAppServer and Request Lifecycle",
+      "purpose": "Covers the WKAppServer threading model, Bottle route registration (static, template GET/POST, root), WKAppPlugin middleware, CORS/security headers, and graceful shutdown.",
+      "parent": "Core Framework (wkapp module)",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "View System: WKViews, WKView, and View Lifecycle",
+      "purpose": "Explains the WKViews registry, WKView mixin, view_class pattern, lifecycle events (on_init, on_prepare, on_loading, on_loaded, on_get, on_post), and form/query-string auto-binding.",
+      "parent": "Core Framework (wkapp module)",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Python–JavaScript Bridge",
+      "purpose": "Details the two-way interop mechanism: view.invoke() in JavaScript, webview_on_invoke() in Python, WKJavascript serialization helpers, WKElementsRef DOM abstraction, and eval_js/eval_js_async from Python.",
+      "parent": "Core Framework (wkapp module)",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Mako Templating Integration",
+      "purpose": "Covers WKAppTemplate, WKViewsLexer (custom ${}/%{} escaping), TemplateLookup configuration, view-class mixin injection, and template inheritance chain.",
+      "parent": "Core Framework (wkapp module)",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "WKWebView iOS Bridge",
+      "purpose": "Overview of the bundled wkwebview.py module — the Python wrapper around iOS WKWebView. Links to child pages for threading, URL schemes, and the JavaScript bridge.",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "WKWebView Class and Core API",
+      "purpose": "Documents the WKWebView class: initialization, load_url/load_html, eval_js/eval_js_async, add_script/add_style, delegate property, script message handlers, and the console REPL.",
+      "parent": "WKWebView iOS Bridge",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Concurrency and Threading Model",
+      "purpose": "Explains the three-thread model (main thread, _webviewDispatcher, URL scheme worker threads), how script messages are queued to avoid deadlocks, and the synchronous eval_js queue mechanism.",
+      "parent": "WKWebView iOS Bridge",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Custom URL Scheme Handler",
+      "purpose": "Covers the WKURLSchemeHandler integration: scheme_* method registration, _urlSchemeTaskPool, _urlSchemeTaskWorker lifecycle, NSHTTPURLResponse synthesis, and the wkapp:// scheme used by WKApp.",
+      "parent": "WKWebView iOS Bridge",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Template System and Views Directory",
+      "purpose": "Overview of the views/ directory structure, template inheritance chain, and the bundled base templates. Links to child pages for base templates and frontend assets.",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Base Template Hierarchy",
+      "purpose": "Documents the template inheritance chain: base/app.html (root HTML shell) → base/layout.html → base/view.html → view.html → user views. Explains each template's role and override points.",
+      "parent": "Template System and Views Directory",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Frontend Static Assets",
+      "purpose": "Covers the static/ directory: bundled Bootstrap 5, jQuery, wkapp.js (WKApp/WKView JS classes), and wkapp.css. Explains how app.js and app.css in views/ are used for per-app customization.",
+      "parent": "Template System and Views Directory",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Default index.html Placeholder",
+      "purpose": "Explains the built-in views/index.html placeholder page: IndexPlaceHolderView, the self-documenting codeblock helper, and how it is replaced by a user-created views/index.html.",
+      "parent": "Template System and Views Directory",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Test Views and Examples",
+      "purpose": "Overview of the test/ directory: the suite of example views demonstrating framework features. Links to child pages for standard view tests and advanced WASM experiments.",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Standard Test Views",
+      "purpose": "Documents test/views/index.html (navigation hub), first_view.html (view.invoke demo), and test_view.html (form binding with on_get/on_post lifecycle hooks). Shows patterns for testing view features.",
+      "parent": "Test Views and Examples",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "WebAssembly and Pyodide Integration Tests",
+      "purpose": "Covers the experimental WASM views: web_asm.html (Pyodide + Wasmer SDK), pyodide.html (Pyodide Web Worker pattern), and preact.html. Explains Cross-Origin Isolation requirements and the coi-serviceworker.js workaround.",
+      "parent": "Test Views and Examples",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    },
+    {
+      "title": "Glossary",
+      "purpose": "Definitions of all codebase-specific terms, abbreviations, class names, and domain concepts that an onboarding engineer needs to know, with code pointers.",
+      "page_notes": [
+        {
+          "content": ""
+        }
+      ]
+    }
+  ]
+}
