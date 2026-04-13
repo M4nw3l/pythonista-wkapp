@@ -1,1 +1,1 @@
-//WKApp - app.js - Application scripts
+//WKApp - app.js - Application scripts placeholder
