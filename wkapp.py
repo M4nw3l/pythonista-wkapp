@@ -12,7 +12,7 @@ import os
 import sys
 import threading
 from urllib.parse import urlparse, quote as urlencode, unquote as urldecode
-
+from pathlib import Path
 import requests
 
 import bottle
@@ -24,6 +24,7 @@ from bottle import (
     route,
     static_file,
     mako_template as template,
+    abort
 )
 
 from mako.lookup import TemplateLookup
@@ -36,7 +37,7 @@ log = logging.getLogger(__name__)
 
 try:
     from .wkwebview import *
-except:
+except ImportError:
     from wkwebview import *
 
 
@@ -46,7 +47,7 @@ class WKAppWebView(WKWebView):
         self.scheme_handler = None
 
     def scheme_wkapp(self, task):
-        log.warning(f'WKAppWebView - URL Scheme - {task.url}')
+        log.info(f'WKAppWebView - URL Scheme - {task.url}')
         if not self.scheme_handler is None and hasattr(self.scheme_handler,
                                                        'webview_scheme_wkapp'):
             self.scheme_handler.webview_scheme_wkapp(self, task)
@@ -54,13 +55,13 @@ class WKAppWebView(WKWebView):
             task.failed(f'WKAppWebView - URL Scheme Unhandled')
 
     def on_javascript_console_message(self, level, content):
-        log.warning(f'WKAppWebView - JS - {level.upper()}: {content}')
+        log.info(f'WKAppWebView - JS - {level.upper()}: {content}')
 
     def webview_did_start_load(self, url):
-        log.warning(f'WKAppWebView - Start loading {url}')
+        log.info(f'WKAppWebView - Start loading {url}')
 
     def webview_did_finish_load(self, url):
-        log.warning(f'WKAppWebView - Finish loading {url}')
+        log.info(f'WKAppWebView - Finish loading {url}')
 
 
 class WKAppView(ui.View):
@@ -384,9 +385,9 @@ class WKViews:
         self.load_view = None
         self.next_view = None
         self.views = {}
-        self.view = WKView()
+        self.view = WKView(self.app)
         self.views[self.view.url] = self.view
-        self.about_blank_view = WKView('about:blank')
+        self.about_blank_view = WKView(self.app, 'about:blank')
         self.views[self.about_blank_view.url] = self.about_blank_view
 
     def template(self, path, **kwargs):
@@ -437,15 +438,16 @@ class WKViews:
         if url == 'about:blank':
             return self.about_blank_view
         if create and not path in self.views:
+            view_template = None
             try:
                 view_template = self.lookup.get_template(path)
                 if view_template is None:
                     raise Exception("Mako template not found.")
-                log.warning(
+                log.info(
                     f'WKViewState - Template found for {path} {view_template}')
             except Exception as e:
                 log.warning(
-                    f'WKViewState - No template found for path {path} {view_template}, {e}'
+                    f'WKViewState - No template found for path {path}, {e}'
                 )
             if not view_template is None and hasattr(view_template.module,
                                                      'view_class'):
@@ -464,18 +466,18 @@ class WKViews:
             self.views[path] = view
             return view
         if not path is None:
-            view = self.views[path]
+            view = self.views.get(path)
         return view
 
     def prepare_load_view(self, url, scheme, nav_type):
-        log.warning(f'WKViewState - Preparing load {url}')
+        log.info(f'WKViewState - Preparing load {url}')
         view = self.get_view(url=url, create=True)
         self.load_view = view
         view.event('on_prepare')
         return True
 
     def start_load_view(self, url):
-        log.warning(f'WKViewState - Start load {url}')
+        log.info(f'WKViewState - Start load {url}')
         url, path = self.get_url_path(url=url)
         if self.load_url != url:
             raise Exception(
@@ -486,7 +488,7 @@ class WKViews:
         view.event('on_loading')
 
     def finish_load_view(self, url):
-        log.warning(f'WKViewState - Finish load {url}')
+        log.info(f'WKViewState - Finish load {url}')
         url, path = self.get_url_path(url)
         if self.next_url != url:
             raise Exception(
@@ -523,9 +525,7 @@ class WKAppPlugin:
         # https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer#security_requirements
         response.add_header('Permissions-Policy', 'cross-origin-isolated=self')
         response.add_header('Access-Control-Allow-Origin', '*')
-        response.add_header(
-            'Access-Control-Allow-Headers',
-            '"Origin, X-Requested-With, Content-Type, Accept"')
+        response.add_header('Access-Control-Allow-Headers','Origin, X-Requested-With, Content-Type, Accept')
         response.add_header('Access-Control-Allow-Methods', '*')
         response.add_header('Cross-Origin-Opener-Policy', 'same-origin')
         response.add_header('Cross-Origin-Embedder-Policy', 'require-corp')
@@ -640,7 +640,7 @@ class WKApp:
         self.app_view.present(mode, **kwargs)
 
     def run(self, **kwargs):
-        log.warning(f'WKApp - Run')
+        log.info(f'WKApp - Run')
         self.start_server()
         self.present(**kwargs)
 
@@ -658,6 +658,8 @@ class WKApp:
         if root != self.module_static_path and not os.path.exists(
                 os.path.join(root, filepath)):
             root = self.module_static_path
+        if not Path(root).joinpath(filepath).exists():
+            abort(404, "Not found.")
         return static_file(filepath, root=root)
 
     def template(self, path, **kwargs):
@@ -665,7 +667,7 @@ class WKApp:
 
     def get_view(self, url=None, path=None, create=False):
         view = self.views.get_view(url=url, path=path, create=create)
-        log.warning(f'WKApp.get_view("{url}", "{path}", {create}) -> {view}')
+        log.info(f'WKApp.get_view("{url}", "{path}", {create}) -> {view}')
         if view is None:
             return view
         values = {}
