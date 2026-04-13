@@ -369,8 +369,7 @@ class WKWebView(ui.View):
 
     def disable_zoom(self):
         name = 'viewport'
-        content = 'width=device-width, initial-scale=1.0,'
-        'maximum-scale=1.0, user-scalable=no'
+        content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'
         self.add_meta(name, content)
 
     def disable_user_selection(self):
@@ -573,7 +572,7 @@ class WKWebView(ui.View):
             return string
 
     @classmethod
-    def console(self, webview_index=0):
+    def console(cls, webview_index=0):
         webview = WKWebView.webviews[webview_index]
         theme = WKWebView.Theme.get_theme()
 
@@ -583,7 +582,7 @@ class WKWebView(ui.View):
         console.set_color(*ui.parse_color(theme.tint)[:3])
         while True:
             value = input('js> ').strip()
-            self.console_view.history().insertObject_atIndex_(
+            cls.console_view.history().insertObject_atIndex_(
                 ns(value + '\n'), 0)
             if value == 'quit':
                 break
@@ -651,7 +650,7 @@ class WKWebView(ui.View):
             except Exception as e:
                 log.error(f'WKWebView exception in should_start_load handler',
                           e)
-        log.warning(f'WKWebView {url} {allow}')
+        log.info(f'WKWebView {url} {allow}')
         allow_or_cancel = 1 if allow else 0
         decision_handler = ObjCInstance(_decision_handler)
         retain_global(decision_handler)
