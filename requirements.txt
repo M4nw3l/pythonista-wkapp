@@ -1,3 +1,6 @@
 bottle >= 0.13.4
-Mako
-requests
+# Mako < 1.2.2 is vulnerable to ReDoS (CVE-2022-40023).
+Mako >= 1.2.2
+# Older requests versions have `verify=False` / proxy credential issues. 2.32.2
+# addresses CVE-2024-35195.
+requests >= 2.32.2

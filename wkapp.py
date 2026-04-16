@@ -91,12 +91,21 @@ class WKAppView(ui.View):
 
 class WKAppServer(threading.Thread):
 
-    def __init__(self, app, host='localhost', port=8080, server_class=None):
+    def __init__(self,
+                 app,
+                 host='localhost',
+                 port=8080,
+                 server_class=None,
+                 debug=False):
         threading.Thread.__init__(self)
         self.app = app
         self.host = host
         self.port = port
         self.server_class = server_class
+        # Security: Bottle's debug mode renders verbose stack traces (including
+        # file paths and source code) in HTTP error responses. It must be
+        # opt-in and default to False to avoid information disclosure.
+        self.debug = debug
 
     def run(self):
         log.warning(f'WKApp - Server Starting...')
@@ -107,7 +116,7 @@ class WKAppServer(threading.Thread):
         self.app.run(host=self.host,
                      port=self.port,
                      server=self.server,
-                     debug=True)
+                     debug=self.debug)
 
     def get_id(self):
         if hasattr(self, '_thread_id'):
@@ -373,10 +382,16 @@ class WKViews:
         bottle.TEMPLATE_PATH.append(app_views_path)
         bottle.TEMPLATE_PATH.append(module_views_path)
         imports = []
+        # Security: HTML-escape all Mako `${}` expressions by default to
+        # mitigate XSS when rendering user-controlled view state (e.g. form
+        # values auto-bound to the view). Templates that intentionally emit
+        # HTML/JS (such as the `codeblock` <%def>) can opt out per-expression
+        # with `${ expr | n }`.
         self.template_settings = {
             'directories': bottle.TEMPLATE_PATH,
             #'module_directory': os.path.join(app_path, 'views-cache'),
             'imports': imports,
+            'default_filters': ['h'],
             'preprocessor': WKViewsLexer.preprocessor,
             'lexer_cls': WKViewsLexer
         }
@@ -524,12 +539,21 @@ class WKAppPlugin:
         # Enable cross origin isolation for browser to consider context secure enough for full web assembly and webgl support
         # https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer#security_requirements
         response.add_header('Permissions-Policy', 'cross-origin-isolated=self')
-        response.add_header('Access-Control-Allow-Origin', '*')
-        response.add_header('Access-Control-Allow-Headers','Origin, X-Requested-With, Content-Type, Accept')
-        response.add_header('Access-Control-Allow-Methods', '*')
+        # Security: CORS is scoped to the app's own origin by default so that
+        # other pages or apps that load the dev server can't read responses.
+        # Use `cors_origin='*'` on WKApp to opt back in to permissive CORS.
+        cors_origin = self.app.cors_origin
+        if cors_origin is None:
+            cors_origin = self.app.base_url
+        response.add_header('Access-Control-Allow-Origin', cors_origin)
+        response.add_header(
+            'Access-Control-Allow-Headers',
+            'Origin, X-Requested-With, Content-Type, Accept')
+        response.add_header('Access-Control-Allow-Methods',
+                            'GET, POST, OPTIONS')
         response.add_header('Cross-Origin-Opener-Policy', 'same-origin')
         response.add_header('Cross-Origin-Embedder-Policy', 'require-corp')
-        response.add_header('Cross-Origin-Resource-Policy', 'cross-origin')
+        response.add_header('Cross-Origin-Resource-Policy', 'same-origin')
 
     def apply(self, callback, route):
         if not self.has_args(callback, 'view'):
@@ -558,7 +582,12 @@ class WKApp:
                  module_static_path='static',
                  custom_scheme=False,
                  no_cache=True,
-                 clear_cache=False):
+                 clear_cache=False,
+                 debug=False,
+                 cors_origin=None,
+                 allow_proxy=False,
+                 proxy_allowed_hosts=None,
+                 proxy_timeout=30):
         self.module_path = os.path.dirname(__file__)
         self.module_static_path = os.path.join(self.module_path,
                                                module_static_path)
@@ -575,6 +604,14 @@ class WKApp:
         self.custom_scheme = custom_scheme
         self.no_cache = no_cache
         self.clear_cache = clear_cache
+        # Security-related configuration (see docs/SECURITY.md).
+        self.debug = debug
+        self.cors_origin = cors_origin
+        self.allow_proxy = allow_proxy
+        self.proxy_allowed_hosts = (set(proxy_allowed_hosts)
+                                    if proxy_allowed_hosts is not None
+                                    else None)
+        self.proxy_timeout = proxy_timeout
         if app is None:
             self._app = Bottle()
             default_app.push(self.app)
@@ -619,7 +656,10 @@ class WKApp:
 
     def start_server(self):
         if self.server is None and self.server_internal:
-            self.server = WKAppServer(self.app, self.host, self.port)
+            self.server = WKAppServer(self.app,
+                                      self.host,
+                                      self.port,
+                                      debug=self.debug)
             self.server.start()
 
     def stop_server(self):
@@ -665,6 +705,28 @@ class WKApp:
     def template(self, path, **kwargs):
         return self.views.template(path, **kwargs)
 
+    # Framework-internal attributes on `WKView` that must never be overwritten
+    # by request form/query data. Exposing these would allow an attacker to
+    # clobber the view's wiring (e.g. replace `app`, `eval_js`, `webview`).
+    _VIEW_RESERVED_ATTRS = frozenset(
+        {'app', 'url', 'path', 'template', 'js'} | set(dir(WKView)))
+
+    def _bind_request_value(self, view, name, value):
+        # Security: only bind form/query values to pre-declared, non-callable,
+        # non-private, non-framework view attributes to prevent attackers from
+        # overwriting methods or internal state via attacker-controlled keys.
+        if not isinstance(name, str) or not name:
+            return
+        if name.startswith('_'):
+            return
+        if name in self._VIEW_RESERVED_ATTRS:
+            return
+        if not hasattr(view, name):
+            return
+        if callable(getattr(view, name)):
+            return
+        setattr(view, name, value)
+
     def get_view(self, url=None, path=None, create=False):
         view = self.views.get_view(url=url, path=path, create=create)
         log.info(f'WKApp.get_view("{url}", "{path}", {create}) -> {view}')
@@ -677,13 +739,11 @@ class WKApp:
         for k, v in request.query.iteritems():
             query[k] = v
             values[k] = v
-            if hasattr(view, k):
-                setattr(view, k, v)
+            self._bind_request_value(view, k, v)
         if method == 'POST':
             for k, v in request.forms.iteritems():
                 values[k] = v
-                if hasattr(view, k):
-                    setattr(view, k, v)
+                self._bind_request_value(view, k, v)
         view.event('on_' + method, **kwargs)
         return view
 
@@ -735,6 +795,27 @@ class WKApp:
     def webview_did_finish_load(self, webview, url):
         self.views.finish_load_view(url)
 
+    # Methods on WKApp that JavaScript is explicitly permitted to invoke via
+    # the `WKApp` context. Anything not listed here is denied, so framework-
+    # internal methods (stop_server, cleanup, setup_server_routes, static_file,
+    # template, get_view, etc.) cannot be driven from the page.
+    _WKAPP_INVOKE_ALLOWED = frozenset({'exit'})
+
+    # Methods inherited from the base WKView that are framework-internal and
+    # must not be reachable from JavaScript-driven invokes. Only methods
+    # declared on a subclass view_class are exposed.
+    _WKVIEW_BASE_ATTRS = frozenset(dir(WKView))
+
+    def _can_invoke(self, pycontext, typ, target):
+        if not isinstance(target, str) or not target or target.startswith('_'):
+            return False
+        if typ == 'WKApp':
+            return target in self._WKAPP_INVOKE_ALLOWED
+        if typ == 'WKView':
+            # Deny base-class framework methods; only allow view_class methods.
+            return target not in self._WKVIEW_BASE_ATTRS
+        return False
+
     def webview_on_invoke(self, sender, typ, context, target, args, kwargs):
         url = sender.current_url
         url, path = self.views.get_url_path(url=url)
@@ -751,6 +832,9 @@ class WKApp:
                 pycontext = self.views.get_view(url=url, path=path)
         else:
             raise Exception(f"Context type {typ} unhandled")
+        if not self._can_invoke(pycontext, typ, target):
+            raise Exception(
+                f"Target '{target}' in context '{typ}' is not invokable")
         if not hasattr(pycontext, target):
             raise Exception(
                 f"Target '{target}' not found in context {pycontext}")
@@ -761,22 +845,68 @@ class WKApp:
             )
         pytarget(*args, **kwargs)
 
+    def _is_proxy_target_allowed(self, url):
+        # Security: only http/https schemes and only hosts the app explicitly
+        # opted in to via `proxy_allowed_hosts` may be proxied. Without an
+        # allowlist the proxy command is a blind SSRF primitive against any
+        # network reachable from the device.
+        try:
+            parsed = urlparse(url)
+        except Exception:
+            return False
+        if parsed.scheme not in ('http', 'https'):
+            return False
+        host = (parsed.hostname or '').lower()
+        if not host:
+            return False
+        if self.proxy_allowed_hosts is None:
+            return False
+        return host in self.proxy_allowed_hosts
+
     def webview_scheme_wkapp(self, webview, task):
         command = task.host
-        if command == "localhost" or command == "proxy":
-            url = task.path
-            if command == "localhost":
-                url = self.base_url + url
-            else:
-                url = urldecode(url[1:])
+        if command == "localhost":
+            url = self.base_url + task.path
             response = requests.request(task.method,
                                         url,
                                         headers=task.headers,
-                                        data=task.body)
+                                        data=task.body,
+                                        timeout=self.proxy_timeout)
             task.finish(status_code=response.status_code,
                         headers=response.headers,
                         data=response.content,
                         content_type=response.headers.get('Content-Type'))
+        elif command == "proxy":
+            # Security: the proxy command is an arbitrary-URL HTTP proxy. It
+            # must be explicitly enabled and is gated by an allowlist so the
+            # webview cannot use it as an open SSRF primitive.
+            if not self.allow_proxy:
+                log.warning('WKApp - wkapp://proxy request denied: disabled')
+                task.failed(
+                    'wkapp://proxy is disabled. Enable with WKApp(allow_proxy=True).'
+                )
+                return
+            url = urldecode(task.path[1:])
+            if not self._is_proxy_target_allowed(url):
+                log.warning(
+                    f'WKApp - wkapp://proxy request denied (not allowed): {url}'
+                )
+                task.failed(
+                    f'wkapp://proxy target not in proxy_allowed_hosts: {url}'
+                )
+                return
+            response = requests.request(task.method,
+                                        url,
+                                        headers=task.headers,
+                                        data=task.body,
+                                        timeout=self.proxy_timeout)
+            task.finish(status_code=response.status_code,
+                        headers=response.headers,
+                        data=response.content,
+                        content_type=response.headers.get('Content-Type'))
+        else:
+            log.warning(f'WKApp - Unknown wkapp:// command: {command}')
+            task.failed(f'Unknown wkapp:// command: {command}')
 
 
 if __name__ == '__main__':

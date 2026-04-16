@@ -77,7 +77,7 @@ from wkapp import *
 
 app = WKApp(__file__)
 app.run()
-''')}
+''') | n}
 </p>
 
 
@@ -91,7 +91,7 @@ ${codeblock('''
 <div>
   <h1>Hello World!</h1>
 </div>
-''')}
+''') | n}
 
 Congratulations! You've just created a WKApp HTML 5 browser based app on your iOS device.
 Now, you may already be wanting to try some more things out, go right ahead any html/css/javascript should just work. The following is a small overview of some of WKApp features and how they are integrated with Bottle.py as for hosting the WSGI web server for the app and the Mako template engine for rendering pages, components and content from templates with a rich, comprehensive syntax using interweaved Python which can generate html markup, styles and even javascript dynamically.
@@ -117,7 +117,7 @@ ${codeblock('''
   <a href="/hello.html">Hello</a>
   <a href="/index.html">Index</a>
 </div>
-''')}
+''') | n}
 
 Add python behavior to views with inline class mixins, manipulate elements, receive lifecycle events and hold custom page state.
 
@@ -156,7 +156,7 @@ textarea.editor {
 <div>
 	<textarea id="editor" class="form-control editor" readonly></textarea>
 </div>
-''')}
+''') | n}
 
 <div class="p-1">
 <button onclick="view.invoke('hello_world_action', 'Hello World\n')">Say Hello (again)</button>
@@ -179,7 +179,7 @@ app.run()
 @route('/my/route')
 def my_route():
   return "Hello World!"
-''')}
+''') | n}
 
 
 
