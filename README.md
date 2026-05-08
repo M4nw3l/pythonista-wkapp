@@ -9,12 +9,13 @@ Creating user interfaces for Python Apps in Pythonista becomes as simple as addi
 
 ## Getting started
 Pip is the recommended installation method for WKApp. 
-Install [StaSh](https://github.com/ywangd/stash) for Pythonista 3 using the installation instructions from its README first.
-Then install the `pythonista-wkapp` module with pip.
+Install with [StaSh](https://github.com/ywangd/stash).
+Or install with pipTerminal from [Pythonista pip configration tool](https://github.com/CrossDarkrix/Pythonista3_pip_Configration_Tool/blob/main/README_EN.md).
 ```
 pip install pythonista-wkapp
 ```
-Alternatively you can also clone or download a zip of this repository and copy/extract the project files into `site-packages/wkapp`.
+Alternatively you can also clone or download a zip of this repository and copy/extract the project files into `site-packages/wkapp`. 
+Note: Dependencies packages must also be installed / made available somewhere if using this installation method. 
 
 To create an app, simply add a folder somewhere containing an `app.py` file as follows.
 
